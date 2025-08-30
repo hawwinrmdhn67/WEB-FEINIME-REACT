@@ -12,7 +12,7 @@ const Login = () => {
     const decoded = jwtDecode(credentialResponse.credential);
 
     const userData = {
-      google_id: decoded.sub,   // Google ID unik
+      google_id: decoded.sub, 
       name: decoded.name,
       email: decoded.email,
       picture: decoded.picture

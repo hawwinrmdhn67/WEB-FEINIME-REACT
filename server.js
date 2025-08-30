@@ -1,4 +1,3 @@
-// server.js
 import express from "express";
 import fetch from "node-fetch";
 import cors from "cors";
@@ -10,9 +9,8 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());
 
-const CLIENT_ID = "492d63e258c23114981f07862ec45c95";
+const MAL_CLIENT_ID = "process.env.MAL_CLIENT_ID";
 
-// Koneksi database MySQL
 const pool = mysql.createPool({
   host: "localhost",
   user: "root",      
@@ -20,7 +18,6 @@ const pool = mysql.createPool({
   database: "feinime"
 });
 
-// ==================== ANIME API ====================
 app.get("/api/anime", async (req, res) => {
   try {
     const response = await fetch(
@@ -60,9 +57,8 @@ app.get("/api/anime/:id", async (req, res) => {
   }
 });
 
-// ==================== USERS ====================
 app.post("/api/save-user", async (req, res) => {
-  const { google_id, name, email, picture } = req.body;  // ⬅️ tambahkan picture
+  const { google_id, name, email, picture } = req.body;  
 
   if (!google_id) {
     return res.status(400).json({ error: "Google ID diperlukan!" });
@@ -76,7 +72,7 @@ app.post("/api/save-user", async (req, res) => {
        ON DUPLICATE KEY UPDATE 
          name = VALUES(name), 
          email = VALUES(email),
-         picture = VALUES(picture)`,   // ⬅️ update juga picture
+         picture = VALUES(picture)`, 
       [google_id, name, email, picture]
     );
     conn.release();
@@ -101,7 +97,6 @@ app.get("/api/users", async (req, res) => {
   }
 });
 
-// ==================== FAVORITES ====================
 app.post("/api/favorites", async (req, res) => {
   const { google_id, anime_id, title, image_url } = req.body;
 
