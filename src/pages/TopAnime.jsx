@@ -28,7 +28,6 @@ const TopAnime = () => {
       });
   }, []);
 
-  // Hitung index untuk slicing array
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentAnime = anime.slice(indexOfFirstItem, indexOfLastItem);

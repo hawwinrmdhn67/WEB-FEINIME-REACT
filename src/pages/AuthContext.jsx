@@ -13,7 +13,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (userData) => {
-    // userData harus berisi { google_id, email, name, picture }
     setUser(userData);
     localStorage.setItem("feinime_user", JSON.stringify(userData));
 

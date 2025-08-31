@@ -2,21 +2,30 @@ import express from "express";
 import fetch from "node-fetch";
 import cors from "cors";
 import mysql from "mysql2/promise";
+import path from "path";
+import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
+
+const CLIENT_ID = process.env.MAL_CLIENT_ID;
+
+const pool = mysql.createPool({
+  host: process.env.MYSQLHOST || "localhost",
+  user: process.env.MYSQLUSER || "root",
+  password: process.env.MYSQLPASSWORD || "",
+  database: process.env.MYSQLDATABASE || "feinime",
+  port: process.env.MYSQLPORT || 3306
+});
 
 app.use(cors());
 app.use(express.json());
-
-const MAL_CLIENT_ID = "process.env.MAL_CLIENT_ID";
-
-const pool = mysql.createPool({
-  host: "localhost",
-  user: "root",      
-  password: "",      
-  database: "feinime"
-});
 
 app.get("/api/anime", async (req, res) => {
   try {
@@ -59,10 +68,7 @@ app.get("/api/anime/:id", async (req, res) => {
 
 app.post("/api/save-user", async (req, res) => {
   const { google_id, name, email, picture } = req.body;  
-
-  if (!google_id) {
-    return res.status(400).json({ error: "Google ID diperlukan!" });
-  }
+  if (!google_id) return res.status(400).json({ error: "Google ID diperlukan!" });
 
   try {
     const conn = await pool.getConnection();
@@ -99,10 +105,7 @@ app.get("/api/users", async (req, res) => {
 
 app.post("/api/favorites", async (req, res) => {
   const { google_id, anime_id, title, image_url } = req.body;
-
-  if (!google_id) {
-    return res.status(400).json({ error: "Login diperlukan!" });
-  }
+  if (!google_id) return res.status(400).json({ error: "Login diperlukan!" });
 
   try {
     const conn = await pool.getConnection();
@@ -125,10 +128,7 @@ app.post("/api/favorites", async (req, res) => {
 
 app.delete("/api/favorites", async (req, res) => {
   const { google_id, anime_id } = req.body;
-
-  if (!google_id) {
-    return res.status(400).json({ error: "Login diperlukan!" });
-  }
+  if (!google_id) return res.status(400).json({ error: "Login diperlukan!" });
 
   try {
     const conn = await pool.getConnection();
@@ -163,12 +163,9 @@ app.get("/api/favorites/:google_id", async (req, res) => {
   }
 });
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 app.use(express.static(path.join(__dirname, "dist")));
 
-app.get("*", (req, res) => {
+app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 

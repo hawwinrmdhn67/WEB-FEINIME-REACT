@@ -1,7 +1,6 @@
-// src/components/FavoriteList.jsx
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../pages/AuthContext"; // sesuaikan path
+import { useAuth } from "../pages/AuthContext"; 
 
 function FavoriteList() {
   const { user } = useAuth();
@@ -10,10 +9,9 @@ function FavoriteList() {
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch favorit user
   useEffect(() => {
     const fetchFavorites = async () => {
-      if (!user) return setLoading(false); // kalau belum login, skip
+      if (!user) return setLoading(false); 
 
       setLoading(true);
       try {
@@ -32,13 +30,12 @@ function FavoriteList() {
     fetchFavorites();
   }, [user]);
 
-  // Hapus favorit
   const removeFavorite = async (animeId) => {
     if (!user) return;
 
     setUpdating(true);
     const prevList = [...favorites];
-    setFavorites(favorites.filter((a) => a.anime_id !== animeId)); // optimistik update
+    setFavorites(favorites.filter((a) => a.anime_id !== animeId)); 
 
     try {
       const res = await fetch("http://localhost:5000/api/favorites", {
@@ -50,7 +47,7 @@ function FavoriteList() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
     } catch (err) {
       console.error("Gagal hapus favorit:", err);
-      setFavorites(prevList); // rollback
+      setFavorites(prevList); 
       alert("Gagal hapus favorit. Silakan coba lagi.");
     } finally {
       setUpdating(false);

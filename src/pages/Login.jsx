@@ -18,13 +18,10 @@ const Login = () => {
       picture: decoded.picture
     };
 
-    // Simpan ke global state (AuthContext)
     login(userData);
 
-    // Simpan juga ke localStorage (supaya AnimeDetail bisa ambil)
     localStorage.setItem("feinime_user", JSON.stringify(userData));
 
-    // Simpan ke backend (MySQL)
     fetch("http://localhost:5000/api/save-user", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
