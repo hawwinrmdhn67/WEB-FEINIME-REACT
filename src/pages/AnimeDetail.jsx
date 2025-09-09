@@ -56,7 +56,6 @@ function AnimeDetail() {
   }, [id, user]);
 
   const handleFavorite = async () => {
-  // If no user is logged in, show a SweetAlert error and exit.
   if (!user) {
     Swal.fire({
       icon: 'error',
@@ -65,42 +64,48 @@ function AnimeDetail() {
       confirmButtonColor: '#8B5CF6',
       background: '#1F2937',
       color: '#fff',
-      showClass: {
-        popup: 'animate__animated animate__fadeInDown'
-      },
-      hideClass: {
-        popup: 'animate__animated animate__fadeOutUp'
-      }
+      showClass: { popup: 'animate__animated animate__fadeInDown' },
+      hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     });
     return;
   }
 
-  // If no anime data exists, exit the function.
   if (!anime) return;
 
-  // Set the state to indicate the favorite status is being updated.
+  // Jika anime sudah di favorit, tampilkan konfirmasi hapus
+  if (isFavorite) {
+    const result = await Swal.fire({
+      title: 'Hapus Anime dari Favorit?',
+      text: `Apakah kamu yakin ingin menghapus ${anime.title} dari favorit?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Tidak',
+      confirmButtonColor: '#8B5CF6',
+      cancelButtonColor: '#EF4444',
+      background: '#1F2937',
+      color: '#fff',
+      showClass: { popup: 'animate__animated animate__fadeInDown' },
+      hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    });
+
+    if (!result.isConfirmed) return; // batal jika pilih "Tidak"
+  }
+
   setUpdatingFav(true);
 
   try {
-    // Determine the anime ID, using 'id' first, then 'mal_id' as a fallback.
     const animeId = anime.id || anime.mal_id;
-    let method;
-    let body;
-    let successMessage;
-    let successTitle;
+    let method, body, successTitle, successMessage;
 
-    // Check if the anime is already a favorite.
     if (isFavorite) {
-      // If it is a favorite, prepare for a DELETE request.
+      // DELETE request
       method = "DELETE";
-      body = JSON.stringify({
-        google_id: user.google_id,
-        anime_id: animeId
-      });
+      body = JSON.stringify({ google_id: user.google_id, anime_id: animeId });
       successTitle = 'Berhasil Dihapus!';
       successMessage = `${anime.title} sudah dihapus dari favorit.`;
     } else {
-      // If it's not a favorite, prepare for a POST request.
+      // POST request
       method = "POST";
       body = JSON.stringify({
         google_id: user.google_id,
@@ -112,19 +117,14 @@ function AnimeDetail() {
       successMessage = `${anime.title} sudah ditambahkan ke favorit.`;
     }
 
-    // Send the request to the server.
     await fetch("http://localhost:5000/api/favorites", {
       method,
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body,
     });
 
-    // Toggle the favorite status in the state.
     setIsFavorite(!isFavorite);
 
-    // Show a success notification.
     Swal.fire({
       icon: 'success',
       title: successTitle,
@@ -132,17 +132,12 @@ function AnimeDetail() {
       confirmButtonColor: '#8B5CF6',
       background: '#1F2937',
       color: '#fff',
-      showClass: {
-        popup: 'animate__animated animate__fadeInDown'
-      },
-      hideClass: {
-        popup: 'animate__animated animate__fadeOutUp'
-      },
       timer: 2000,
-      showConfirmButton: false
+      showConfirmButton: false,
+      showClass: { popup: 'animate__animated animate__fadeInDown' },
+      hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     });
   } catch (err) {
-    // If an error occurs, log it and show an error notification.
     console.error("Gagal update favorit:", err);
     Swal.fire({
       icon: 'error',
@@ -151,18 +146,14 @@ function AnimeDetail() {
       confirmButtonColor: '#EF4444',
       background: '#1F2937',
       color: '#fff',
-      showClass: {
-        popup: 'animate__animated animate__fadeInDown'
-      },
-      hideClass: {
-        popup: 'animate__animated animate__fadeOutUp'
-      }
+      showClass: { popup: 'animate__animated animate__fadeInDown' },
+      hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     });
   } finally {
-    // Always reset the updating state, regardless of success or failure.
     setUpdatingFav(false);
   }
 };
+
 
   if (loadingAnime) return <p className="text-center text-gray-400 mt-50">Loading...</p>;
   if (!anime) return <p className="text-center text-red-400 mt-50">Anime tidak ditemukan.</p>;

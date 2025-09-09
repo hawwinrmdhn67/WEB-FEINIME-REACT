@@ -48,14 +48,35 @@ function FavoriteList() {
     });
   };
 
-  const removeFavorite = async (animeId) => {
-    if (!user) return;
+    const removeFavorite = async (animeId) => {
+    if (!user) return; // Pastikan user login
 
+    // 1️⃣ Tampilkan konfirmasi sebelum hapus
+    const result = await Swal.fire({
+      title: 'Hapus Anime ini?',
+      text: "Kamu yakin ingin menghapus anime ini dari favorit?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Tidak',
+      confirmButtonColor: '#8B5CF6',
+      cancelButtonColor: '#EF4444',
+      background: '#1F2937',
+      color: '#fff',
+      showClass: { popup: "animate__animated animate__fadeInDown" },
+      hideClass: { popup: "animate__animated animate__fadeOutUp" },
+    });
+
+    // 2️⃣ Batalkan jika pilih "Tidak"
+    if (!result.isConfirmed) return;
+
+    // 3️⃣ Update state lokal dulu (optimistic update)
     setUpdating(true);
     const prevList = [...favorites];
     setFavorites(favorites.filter((a) => a.anime_id !== animeId));
 
     try {
+      // 4️⃣ Hapus di backend
       const res = await fetch("http://localhost:5000/api/favorites", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -64,13 +85,15 @@ function FavoriteList() {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
+      // 5️⃣ Notifikasi sukses
       showSwal("success", "Berhasil Dihapus!", "Anime berhasil dihapus dari favorit.", 1500);
     } catch (err) {
+      // 6️⃣ Jika gagal, rollback state lokal
       console.error("Gagal hapus favorit:", err);
       setFavorites(prevList);
       showSwal("error", "Gagal", "Gagal hapus favorit. Silakan coba lagi.");
     } finally {
-      setUpdating(false);
+      setUpdating(false); // Reset state updating
     }
   };
 
