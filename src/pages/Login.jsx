@@ -66,7 +66,7 @@ const Login = () => {
   };
 
   return (
-    <div className="w-full flex flex-col items-center px-4 sm:px-6 py-8 text-center">
+    <div className="w-full flex flex-col items-center px-4 sm:px-6 py-25 text-center">
       <div className="bg-gray-800 rounded-2xl p-6 sm:p-8 shadow-lg w-full max-w-sm sm:max-w-md">
         <h2 className="flex items-center justify-center text-xl sm:text-2xl font-bold mb-4">
           <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
@@ -86,7 +86,7 @@ const Login = () => {
             <input
               type="email"
               className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-white outline-none text-sm sm:text-base"
-              placeholder="Masukkan email"
+              placeholder="Email or username"
             />
           </div>
           <div>
@@ -94,7 +94,7 @@ const Login = () => {
             <input
               type="password"
               className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-white outline-none text-sm sm:text-base"
-              placeholder="Masukkan password"
+              placeholder="Password"
             />
           </div>
 

@@ -7,6 +7,7 @@ import Favorites from "./pages/Favorites";
 import Login from "./pages/Login";
 import AnimeDetail from "./pages/AnimeDetail";
 import { AuthProvider } from "./pages/AuthContext";
+import Setting from "./pages/Setting";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
               <Route path="/favorites" element={<Favorites />} />
               <Route path="/login" element={<Login />} />
               <Route path="/anime/:id" element={<AnimeDetail />} />
+              <Route path="/setting" element={<Setting/>} />
             </Routes>
           </div>
         </div>

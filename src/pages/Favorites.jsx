@@ -98,7 +98,7 @@ function FavoriteList() {
   };
 
   if (!user)
-    return <p className="text-center mt-50 text-white">Silakan login untuk melihat list anime favoritemu.</p>;
+    return <p className="text-center mt-50 text-white">Please login to see your favorite anime list.</p>;
   if (loading) return <p className="text-center mt-50 text-white">Loading...</p>;
   if (error) return <p className="text-center mt-50 text-red-400">{error}</p>;
   if (favorites.length === 0)

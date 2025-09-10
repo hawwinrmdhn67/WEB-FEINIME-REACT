@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Menu, X, Home, Star, List, Heart, LogIn } from "lucide-react";
 import Swal from "sweetalert2";
 import { useAuth } from "../pages/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,8 +11,25 @@ function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  const desktopDropdownRef = useRef(null);
+  const mobileDropdownRef = useRef(null);
+
   const toggleMenu = () => setIsOpen(!isOpen);
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+
+  // Klik di luar dropdown menutup dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        (desktopDropdownRef.current && !desktopDropdownRef.current.contains(event.target)) &&
+        (mobileDropdownRef.current && !mobileDropdownRef.current.contains(event.target))
+      ) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleLogout = async () => {
     setDropdownOpen(false);
@@ -49,13 +67,14 @@ function Navbar() {
         {/* Logo */}
         <Link
           to="/"
-          className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
+          className="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
         >
+          <img src="/logofeinime.png" alt="Logo" className="w-8 h-8 object-contain" />
           FeiNime
         </Link>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex space-x-6 items-center">
+        <div className="hidden md:flex flex-1 justify-center items-center space-x-6">
           {menuItems.map((item, index) => (
             <NavLink
               key={index}
@@ -67,7 +86,10 @@ function Navbar() {
               {item.name}
             </NavLink>
           ))}
+        </div>
 
+        {/* Login / Avatar Desktop */}
+        <div className="hidden md:flex items-center ml-auto relative" ref={desktopDropdownRef}>
           {!user ? (
             <NavLink
               to="/login"
@@ -77,56 +99,57 @@ function Navbar() {
               Login
             </NavLink>
           ) : (
-            <div className="relative">
+            <>
               <img
                 src={user.picture || "https://i.pravatar.cc/100"}
                 alt={user.name || "User"}
                 className="w-10 h-10 rounded-full cursor-pointer"
                 onClick={toggleDropdown}
               />
-              {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-gray-800/90 backdrop-blur-md rounded-xl shadow-lg overflow-hidden z-20">
-                  {/* User Info */}
-                  <div className="px-4 py-3 border-b border-gray-700 flex items-center gap-3">
-                    {user.picture ? (
-                      <img
-                        src={user.picture}
-                        alt={user.name || "User"}
-                        className="w-10 h-10 rounded-full border-2 border-indigo-400 transition-opacity duration-300"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-gray-700 animate-pulse"></div>
-                    )}
-
-                    <div className="flex flex-col">
-                      <span className="text-sm font-semibold text-white">
-                        {user.name || (
-                          <span className="bg-gray-700 w-20 h-3 rounded animate-pulse"></span>
-                        )}
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        {user.email || (
-                          <span className="bg-gray-700 w-28 h-2 rounded animate-pulse"></span>
-                        )}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Logout */}
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-3 hover:bg-gradient-to-r hover:from-blue-400 hover:to-purple-400 hover:text-white transition-colors duration-200"
+              <AnimatePresence>
+                {dropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 top-full mt-2 w-56 bg-gray-800/90 backdrop-blur-md rounded-xl shadow-lg overflow-hidden z-20"
                   >
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
+                    <div className="px-4 py-3 border-b border-gray-700 flex items-center gap-3">
+                      <img
+                        src={user.picture || "https://i.pravatar.cc/100"}
+                        alt={user.name || "User"}
+                        className="w-10 h-10 rounded-full"
+                      />
+                      <div className="flex flex-col">
+                        <span className="text-sm font-semibold text-white">{user.name}</span>
+                        <span className="text-xs text-gray-400">{user.email}</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setDropdownOpen(false); // tutup dropdown
+                        navigate("/setting"); // pindah halaman
+                      }}
+                      className="w-full text-left px-4 py-3 hover:bg-gradient-to-r hover:from-blue-400 hover:to-purple-400 hover:text-white transition-colors duration-200"
+                    >
+                      Setting
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-3 hover:bg-gradient-to-r hover:from-blue-400 hover:to-purple-400 hover:text-white transition-colors duration-200"
+                    >
+                      Logout
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </>
           )}
         </div>
 
         {/* Mobile Toggle */}
-        <div className="md:hidden flex items-center gap-2">
+        <div className="md:hidden flex items-center gap-2 relative" ref={mobileDropdownRef}>
           {user && (
             <img
               src={user.picture || "https://i.pravatar.cc/100"}
@@ -141,30 +164,47 @@ function Navbar() {
           >
             {isOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
-        </div>
 
-        {/* Mobile Dropdown Avatar */}
-        {dropdownOpen && user && (
-          <div className="absolute top-16 right-4 w-56 bg-gray-800/90 backdrop-blur-md rounded-xl shadow-lg overflow-hidden z-20 md:hidden">
-            <div className="px-4 py-3 border-b border-gray-700 flex items-center gap-3">
-              <img
-                src={user.picture || "https://i.pravatar.cc/100"}
-                alt={user.name || "User"}
-                className="w-10 h-10 rounded-full"
-              />
-              <div className="flex flex-col">
-                <span className="text-sm font-semibold text-white">{user.name}</span>
-                <span className="text-xs text-gray-400">{user.email}</span>
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="w-full text-left px-4 py-3 hover:bg-gradient-to-r hover:from-blue-400 hover:to-purple-400 hover:text-white transition-colors duration-200"
-            >
-              Logout
-            </button>
-          </div>
-        )}
+          {/* Mobile Dropdown Avatar */}
+          <AnimatePresence>
+            {dropdownOpen && user && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="absolute top-16 right-0 w-56 bg-gray-800/90 backdrop-blur-md rounded-xl shadow-lg overflow-hidden z-20"
+              >
+                <div className="px-4 py-3 border-b border-gray-700 flex items-center gap-3">
+                  <img
+                    src={user.picture || "https://i.pravatar.cc/100"}
+                    alt={user.name || "User"}
+                    className="w-10 h-10 rounded-full"
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-white">{user.name}</span>
+                    <span className="text-xs text-gray-400">{user.email}</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                  setDropdownOpen(false); // tutup dropdown
+                  navigate("/setting"); // pindah halaman
+                     }}
+                    className="w-full text-left px-4 py-3 hover:bg-gradient-to-r hover:from-blue-400 hover:to-purple-400 hover:text-white transition-colors duration-200"
+                    >
+                  Setting
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-3 hover:bg-gradient-to-r hover:from-blue-400 hover:to-purple-400 hover:text-white transition-colors duration-200"
+                >
+                  Logout
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* Mobile Sidebar */}
